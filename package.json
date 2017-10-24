@@ -1,0 +1,30 @@
+{
+  "name": "etekcity-smartplug",
+  "version": "1.0.0",
+  "description": "etekcity-api",
+  "main": "client.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arupex/etekcity-smartplug.git"
+  },
+  "keywords": [
+    "etekcity",
+    "smartplug",
+    "vesync",
+    "metering",
+    "smarthome"
+  ],
+  "author": "dirwin517",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/arupex/etekcity-smartplug/issues"
+  },
+  "homepage": "https://github.com/arupex/etekcity-smartplug#readme",
+  "dependencies": {
+    "hyper-request": "0.1.17",
+    "form-data": "^2.3.1"
+  }
+}
