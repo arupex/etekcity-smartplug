@@ -85,6 +85,37 @@ module.exports = class EtekCityClient {
         });
     }
 
+    getStats(deviceId) {
+        var today = new Date();
+        var res = today.toISOString().slice(0,10).replace(/-/g,"");
+        let formData = new FormData();
+        formData.append('cid', deviceId);
+        formData.append('date', res);
+        formData.append('Type', 'extDay');
+        formData.append('zoneOffset', today.getTimezoneOffset() / -60);
+
+        return this.client.post('/loadStat', {
+            headers: Object.assign({
+                tk: this.token,
+                id: this.uniqueId,
+                uniqueId: this.uniqueId,
+                cid : deviceId,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }, formData.getHeaders()),
+            body : {
+                cid : deviceId,
+                date : res, 
+                Type: 'extDay',
+                zoneOffset: today.getTimezoneOffset() / -60
+            }
+        }).then(response => {
+            response.cuurentDay = Math.round(response.cuurentDay / 3600 * 1000) / 1000;
+            response.sevenDay = Math.round(response.sevenDay / 3600 * 1000) / 1000;
+            response.thirtyDay = Math.round(response.thirtyDay / 3600 * 1000) / 1000;
+            return response;
+        });
+    }
+
     // This is pulled directly(ported to javascript) from the Mobile apps Java source code
     parseNumeric(input) {
         let split = input.split(':');
