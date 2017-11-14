@@ -85,14 +85,20 @@ module.exports = class EtekCityClient {
         });
     }
 
-    getStats(deviceId) {
-        var today = new Date();
-        var res = today.toISOString().slice(0,10).replace(/-/g,"");
+    _round(value) {
+        return Math.round(value / 3600 * 1000) / 1000;
+    }
+
+    getStats(deviceId,
+             reqDate = new Date().toISOString().slice(0,10).replace(/-/g,''),
+             timeZoneOffset = new Date().getTimezoneOffset() / -60,
+             round = true) {
+
         let formData = new FormData();
         formData.append('cid', deviceId);
-        formData.append('date', res);
+        formData.append('date', reqDate);
         formData.append('Type', 'extDay');
-        formData.append('zoneOffset', today.getTimezoneOffset() / -60);
+        formData.append('zoneOffset', timeZoneOffset);
 
         return this.client.post('/loadStat', {
             headers: Object.assign({
@@ -104,14 +110,14 @@ module.exports = class EtekCityClient {
             }, formData.getHeaders()),
             body : {
                 cid : deviceId,
-                date : res, 
+                date : reqDate,
                 Type: 'extDay',
-                zoneOffset: today.getTimezoneOffset() / -60
+                zoneOffset: timeZoneOffset
             }
         }).then(response => {
-            response.cuurentDay = Math.round(response.cuurentDay / 3600 * 1000) / 1000;
-            response.sevenDay = Math.round(response.sevenDay / 3600 * 1000) / 1000;
-            response.thirtyDay = Math.round(response.thirtyDay / 3600 * 1000) / 1000;
+            response.currentDay = round?this._round(response.currentDay) : response.currentDay;
+            response.sevenDay   = round?this._round(response.sevenDay)   : response.sevenDay;
+            response.thirtyDay  = round?this._round(response.thirtyDay)  : response.thirtyDay;
             return response;
         });
     }

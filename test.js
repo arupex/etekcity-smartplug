@@ -16,7 +16,7 @@ client.login(config.username, config.password).then( () => {
 }).then( (device) => {
     console.log(`getting kWh data for ${device.id}`);
     return client.getStats(device.id).then( (statData) => {
-        console.log(`daily total ${statData.cuurentDay} kWh and 7 day total ${statData.sevenDay}`
+        console.log(`daily total ${statData.currentDay} kWh and 7 day total ${statData.sevenDay}`
             + ` kWh and 30 day total ${statData.thirtyDay} kWh`);
         return device;
     });
