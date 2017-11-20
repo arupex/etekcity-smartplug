@@ -18,15 +18,18 @@ client.login(config.username, config.password).then( () => {
     return client.getStats(device.id).then( (statData) => {
         console.log(`daily total ${statData.currentDay} kWh and 7 day total ${statData.sevenDay}`
             + ` kWh and 30 day total ${statData.thirtyDay} kWh`);
-        return device;
+        return client.getStats(device.id, '20171119', -5, false, Client.HISTORIC_STAT_TYPES.DAY).then( (dailyStats) => {
+            console.log(`Daily Data ${JSON.stringify(dailyStats)}`);
+            return device;
+        });
     });
 }).then( (device) => {
     if(device.status === 'open') {
         console.log(`turning device ${device.name} off`);
-        return client.turnOff(device.id);
+        // return client.turnOff(device.id);
     }
     else {
         console.log(`turning device ${device.name} on`);
-        return client.turnOn(device.id);
+        // return client.turnOn(device.id);
     }
 });
