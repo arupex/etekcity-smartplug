@@ -14,6 +14,15 @@ module.exports = class EtekCityClient {
         });
     }
 
+    static get HISTORIC_STAT_TYPES() {
+        return {
+            DAY: 'day',
+            MONTH: 'month',
+            YEAR: 'year',
+            EXT_DAY: 'extDay'
+        }
+    };
+
     login(username, password) {
         let formData = new FormData();
         formData.append('Account', username);
@@ -92,12 +101,13 @@ module.exports = class EtekCityClient {
     getStats(deviceId,
              reqDate = new Date().toISOString().slice(0,10).replace(/-/g,''),
              timeZoneOffset = new Date().getTimezoneOffset() / -60,
-             round = true) {
+             round = true,
+             type = EtekCityClient.HISTORIC_STAT_TYPES.EXT_DAY) {
 
         let formData = new FormData();
         formData.append('cid', deviceId);
         formData.append('date', reqDate);
-        formData.append('Type', 'extDay');
+        formData.append('Type', type);
         formData.append('zoneOffset', timeZoneOffset);
 
         return this.client.post('/loadStat', {
@@ -111,13 +121,21 @@ module.exports = class EtekCityClient {
             body : {
                 cid : deviceId,
                 date : reqDate,
-                Type: 'extDay',
+                Type: type,
                 zoneOffset: timeZoneOffset
             }
         }).then(response => {
-            response.currentDay = round?this._round(response.currentDay) : response.currentDay;
-            response.sevenDay   = round?this._round(response.sevenDay)   : response.sevenDay;
-            response.thirtyDay  = round?this._round(response.thirtyDay)  : response.thirtyDay;
+            if(type === EtekCityClient.HISTORIC_STAT_TYPES.EXT_DAY) {
+                return {
+                    //API has it spelt cuurentDay...dont ask
+                    currentDay: round ? this._round(response.cuurentDay) : response.cuurentDay,
+                    sevenDay: round ? this._round(response.sevenDay) : response.sevenDay,
+                    thirtyDay: round ? this._round(response.thirtyDay) : response.thirtyDay
+                };
+            }
+            else if(Array.isArray(response)){
+                return response.map(e => { return { value : e }; });//future put timestamp in
+            }
             return response;
         });
     }
