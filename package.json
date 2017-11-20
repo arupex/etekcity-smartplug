@@ -1,6 +1,6 @@
 {
   "name": "etekcity-smartplug",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "etekcity-api",
   "main": "client.js",
   "scripts": {
