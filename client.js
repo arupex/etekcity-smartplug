@@ -1,6 +1,6 @@
-let FormData = require('form-data');
+const FormData = require('form-data');
 
-module.exports = class EtekCityClient {
+class EtekCityClient {
 
     constructor() {
         const HyperRequest = require('hyper-request');
@@ -23,7 +23,7 @@ module.exports = class EtekCityClient {
         }
     };
 
-    login(username, password) {
+    async login(username, password) {
         let formData = new FormData();
         formData.append('Account', username);
         formData.append('Password', password);
@@ -32,43 +32,43 @@ module.exports = class EtekCityClient {
         formData.append('OS', 'Android');
         formData.append('DevToken', 'AkuEZmg_eu5m14eQRDxqYBsUzR-I7ZjaQtmKvU5Mw5a2');
 
-        return this.client.post('/login', {
+        let response = await this.client.post('/login', {
             headers: Object.assign({
                 password: password,
                 account: username,
                 'Content-Type': 'application/x-www-form-urlencoded'
             }, formData.getHeaders())
-        }).then((response) => {
-            this.token = response.tk;
-            this.uniqueId = response.id;
         });
+
+        this.token = response.tk;
+        this.uniqueId = response.id;
+
+        return response;
     }
 
-    getDevices() {
-        return this.client.post('/loadMain', {
+    async getDevices() {
+        let response = await this.client.post('/loadMain', {
             headers: {
                 tk: this.token,
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
-        }).then((response) => {
+        });
 
-            let devices = response.devices.map((device) => {
-                return {
-                    id: device.id,
-                    name: device.deviceName,
-                    status: device.relay
-                };
-            });
-            return devices;
+        return response.devices.map((device) => {
+            return {
+                id: device.id,
+                name: device.deviceName,
+                status: device.relay
+            };
         });
     }
 
-    getMeter(deviceId) {
+    async getMeter(deviceId) {
         let formData = new FormData();
         formData.append('cid', deviceId);
         formData.append('uri', '/getRuntime');
 
-        return this.client.post('/devRequest', {
+        let response = await this.client.post('/devRequest', {
             headers: Object.assign({
                 tk: this.token,
                 id: this.uniqueId,
@@ -80,25 +80,25 @@ module.exports = class EtekCityClient {
                 cid : deviceId,
                 uri : '/getRuntime'
             }
-        }).then(response => {
-            if(response.power !== 'NaN'){
-                response.power = this.parseNumeric(response.power).current;
-            }
-            if(response.voltage !== 'NaN'){
-                response.voltage = this.parseNumeric(response.voltage).current;
-            }
-            if(response.current !== 'NaN'){
-                response.current = this.parseNumeric(response.current).current;
-            }
-            return response;
         });
+
+        if(response.power !== 'NaN'){
+            response.power = this.parseNumeric(response.power).current;
+        }
+        if(response.voltage !== 'NaN'){
+            response.voltage = this.parseNumeric(response.voltage).current;
+        }
+        if(response.current !== 'NaN'){
+            response.current = this.parseNumeric(response.current).current;
+        }
+        return response;
     }
 
     _round(value) {
         return Math.round(value / 3600 * 1000) / 1000;
     }
 
-    getStats(deviceId,
+    async getStats(deviceId,
              reqDate = new Date().toISOString().slice(0,10).replace(/-/g,''),
              timeZoneOffset = new Date().getTimezoneOffset() / -60,
              round = true,
@@ -110,7 +110,7 @@ module.exports = class EtekCityClient {
         formData.append('Type', type);
         formData.append('zoneOffset', timeZoneOffset);
 
-        return this.client.post('/loadStat', {
+        let response = await this.client.post('/loadStat', {
             headers: Object.assign({
                 tk: this.token,
                 id: this.uniqueId,
@@ -124,20 +124,20 @@ module.exports = class EtekCityClient {
                 Type: type,
                 zoneOffset: timeZoneOffset
             }
-        }).then(response => {
-            if(type === EtekCityClient.HISTORIC_STAT_TYPES.EXT_DAY) {
-                return {
-                    //API has it spelt cuurentDay...dont ask
-                    currentDay: round ? this._round(response.cuurentDay) : response.cuurentDay,
-                    sevenDay: round ? this._round(response.sevenDay) : response.sevenDay,
-                    thirtyDay: round ? this._round(response.thirtyDay) : response.thirtyDay
-                };
-            }
-            else if(Array.isArray(response)){
-                return response.map(e => { return { value : e }; });//future put timestamp in
-            }
-            return response;
         });
+
+        if(type === EtekCityClient.HISTORIC_STAT_TYPES.EXT_DAY) {
+            return {
+                //API has it spelt cuurentDay...dont ask, adding response.currentDay incase they fix it
+                currentDay: round ? this._round(response.currentDay || response.cuurentDay) : (response.currentDay||response.cuurentDay),
+                sevenDay: round ? this._round(response.sevenDay) : response.sevenDay,
+                thirtyDay: round ? this._round(response.thirtyDay) : response.thirtyDay
+            };
+        }
+        else if(Array.isArray(response)){
+            return response.map(e => { return { value : e }; });//future put timestamp in
+        }
+        return response;
     }
 
     // This is pulled directly(ported to javascript) from the Mobile apps Java source code
@@ -151,7 +151,7 @@ module.exports = class EtekCityClient {
         return { current, instant };
     }
 
-    turnOn(deviceId) {
+    async turnOn(deviceId) {
         let formData = new FormData();
         formData.append('cid', deviceId);
         formData.append('uri', '/relay');
@@ -169,12 +169,10 @@ module.exports = class EtekCityClient {
                 uri : '/relay',
                 action : 'open'
             }
-        }).then(response => {
-            return response;
         });
     }
 
-    turnOff(deviceId) {
+    async turnOff(deviceId) {
         let formData = new FormData();
         formData.append('cid', deviceId);
         formData.append('uri', '/relay');
@@ -192,9 +190,9 @@ module.exports = class EtekCityClient {
                 uri : '/relay',
                 action : 'break'
             }
-        }).then(response => {
-            return response;
         });
     }
 
-};
+}
+
+module.exports = EtekCityClient;
