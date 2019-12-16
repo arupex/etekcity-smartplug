@@ -1,7 +1,11 @@
 # etekcity-smartplug
     
+## Device
+    This is a software interface for the Vesync API (ripped from Android Packet Capture and Decompile of Android App)
+    for the Vesync Etekcity smart plugs 
+    https://www.amazon.com/dp/B01M3MYIFS/ 
     
-##Sample Use (Async)
+## Sample Use (Async)
     
     let Client = require('./client');
     

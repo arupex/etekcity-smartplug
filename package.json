@@ -1,6 +1,6 @@
 {
   "name": "etekcity-smartplug",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "etekcity-api",
   "main": "client.js",
   "scripts": {
@@ -15,7 +15,12 @@
     "smartplug",
     "vesync",
     "metering",
-    "smarthome"
+    "smarthome",
+    "energy",
+    "smartpower",
+    "smartoutlet",
+    "smart",
+    "plug"
   ],
   "author": "dirwin517",
   "license": "UNLICENSED",
@@ -24,7 +29,7 @@
   },
   "homepage": "https://github.com/arupex/etekcity-smartplug#readme",
   "dependencies": {
-    "hyper-request": "0.1.17",
+    "hyper-request": "3.2.0",
     "form-data": "^2.3.1"
   }
 }

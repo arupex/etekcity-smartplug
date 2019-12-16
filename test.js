@@ -28,9 +28,9 @@
 
     if (theaterLight.status === 'open') {
         console.log(`turning device ${theaterLight.name} off`);
-        // return client.turnOff(device.id);
+        await client.turnOff(theaterLight.id);
     } else {
         console.log(`turning device ${theaterLight.name} on`);
-        // return client.turnOn(device.id);
+        await client.turnOn(theaterLight.id);
     }
 })();
